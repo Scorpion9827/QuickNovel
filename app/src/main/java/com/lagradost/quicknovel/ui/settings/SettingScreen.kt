@@ -367,6 +367,12 @@ object SettingScreen : SearchableSettings {
                         title = stringResource(R.string.show_authors_notes),
                         preference = settings.reader.authorNotes,
                     ),
+                    Preference.PreferenceItem.SwitchPreference(
+                        icon = painterResource(R.drawable.ic_baseline_edit_24),
+                        title = stringResource(R.string.clean_chapters),
+                        subtitle = stringResource(R.string.clean_chapters_desc),
+                        preference = settings.reader.cleanChapters,
+                    ),
                     // Removed as the actual bloat filtering is shit and not very useful,
                     // but can increase the time too much
                     /*Preference.PreferenceItem.SwitchPreference(

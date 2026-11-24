@@ -86,6 +86,11 @@ class ReaderPreferences(preferences: PreferenceStore) {
         "author_notes",
         false,
     )
+    /** Remove translator/editor credits and site watermarks when generating epubs */
+    val cleanChapters = preferences.getBoolean(
+        "clean_chapters",
+        true,
+    )
 }
 
 

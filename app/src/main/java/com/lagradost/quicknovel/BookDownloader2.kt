@@ -40,6 +40,7 @@ import coil3.asDrawable
 import coil3.request.ImageRequest
 import coil3.request.SuccessResult
 import com.anggrayudi.storage.StorageFile
+import com.lagradost.cloudstream4.AppSettings
 import com.lagradost.quicknovel.BaseApplication.Companion.context
 import com.lagradost.quicknovel.BaseApplication.Companion.getKey
 import com.lagradost.quicknovel.BaseApplication.Companion.getKeys
@@ -68,6 +69,7 @@ import com.lagradost.quicknovel.ui.download.DownloadFragment
 import com.lagradost.quicknovel.util.Apis.Companion.getApiFromName
 import com.lagradost.quicknovel.util.Apis.Companion.getApiFromNameOrNull
 import com.lagradost.quicknovel.util.AppUtils.textToHtmlChapter
+import com.lagradost.quicknovel.util.ChapterCleaner
 import com.lagradost.quicknovel.util.Coroutines.ioSafe
 import com.lagradost.quicknovel.util.Coroutines.main
 import com.lagradost.quicknovel.util.Event
@@ -708,7 +710,8 @@ object BookDownloader2Helper {
         filepath: String,
         index: Int,
         stripHtml: Boolean,
-        stripAuthorNotes: Boolean
+        stripAuthorNotes: Boolean,
+        cleanChapters: Boolean = true,
     ): LoadedChapter? {
         val rFile = File(filepath)
         if (!rFile.exists()) return null
@@ -736,6 +739,10 @@ object BookDownloader2Helper {
 
         // We do not want to create a nested <body> will cause some readers to fail
         val body: Element = document.selectFirst("body") ?: document
+
+        if (cleanChapters) {
+            ChapterCleaner.clean(body)
+        }
 
         // Strip the first line if it is useless
         val trimTitle = title.trim()
@@ -884,6 +891,7 @@ object BookDownloader2Helper {
 
                 val stripHtml = activity.getStripHtml()
                 val stripAuthorNotes = activity.getStripAuthorNodes()
+                val cleanChapters = AppSettings(activity).reader.cleanChapters.get()
                 val head = activity.filesDir.toString()
                 val dir = File(head + getDirectory(sApiName, sAuthor, sName))
                 // do not include chapters that are stream read downloaded in partial chapter generation
@@ -902,7 +910,7 @@ object BookDownloader2Helper {
                             sName,
                             threadIndex
                         )
-                    val chap = getChapter(filepath, threadIndex, stripHtml, stripAuthorNotes)
+                    val chap = getChapter(filepath, threadIndex, stripHtml, stripAuthorNotes, cleanChapters)
                         ?: return@pmap null
                     Triple(
                         Resource(

@@ -314,6 +314,8 @@
     <string name="import_epub">Import a book</string>
     <string name="import_epubs">Import books</string>
     <string name="show_authors_notes">Show authors notes</string>
+    <string name="clean_chapters">Clean downloaded chapters</string>
+    <string name="clean_chapters_desc">Remove translator/editor credits and site watermarks (like freewebnovel.com) from generated epubs</string>
 
     <!-- Some errors -->
     <string name="connection_timeout">"Connection timeout\nPlease try again later."</string>

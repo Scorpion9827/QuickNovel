@@ -30,6 +30,7 @@ import com.lagradost.quicknovel.downloader.BookState.updateState
 import com.lagradost.quicknovel.mvvm.logError
 import com.lagradost.quicknovel.ui.common.ImmutableSearchResponse
 import com.lagradost.quicknovel.util.Apis.Companion.getApiFromName
+import com.lagradost.quicknovel.util.ChapterCleaner
 import com.lagradost.quicknovel.util.cmap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.withLock
@@ -76,7 +77,10 @@ private data class CachedFileOptions(
 
 private data class GenerationOptions(
     @JsonProperty("authorNotes")
-    val authorNotes: Boolean
+    val authorNotes: Boolean,
+    /** Defaults to false so epubs generated before this option existed are regenerated */
+    @JsonProperty("cleanChapters")
+    val cleanChapters: Boolean = false,
 )
 
 object BookReader {
@@ -230,7 +234,10 @@ object BookReader {
         ImmutableSearchResponse.addToHistory(response = response)
 
         val settings = AppSettings(activity)
-        val options = GenerationOptions(authorNotes = settings.reader.authorNotes.get())
+        val options = GenerationOptions(
+            authorNotes = settings.reader.authorNotes.get(),
+            cleanChapters = settings.reader.cleanChapters.get(),
+        )
 
         /** We create a dummy handle here, but the features like pause/resume is not used */
         val handle = BookHandle.from(context = activity, response = response, id = id)
@@ -562,6 +569,10 @@ object BookReader {
 
         // We do not want to create a nested <body> will cause some readers to fail
         val body: Element = document.selectFirst("body") ?: document
+
+        if (options.cleanChapters) {
+            ChapterCleaner.clean(body)
+        }
 
         // Strip the first line if it is useless
         val trimTitle = title.trim()
